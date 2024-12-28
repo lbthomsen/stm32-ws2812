@@ -38,10 +38,11 @@ typedef enum {
     WS2812_Mem
 } ws2812_resultTypeDef;
 
+// Statemachine states
 typedef enum {
-    LED_RES = 0,
-    LED_IDL = 1,
-    LED_DAT = 2
+    LED_RES = 0,    // Reset latch cycle
+    LED_IDL = 1,    // Idle doing nothing except waiting for is_dirty
+    LED_DAT = 2     // Transferring led data - one led at the time
 } ws2812_stateTypeDef;
 
 typedef struct {
@@ -51,12 +52,12 @@ typedef struct {
     uint16_t leds;                          // Number of LEDs on the string
     uint8_t *led;                           // Dynamically allocated array of LED RGB values
     ws2812_stateTypeDef led_state;          // LED Transfer state machine
-    uint8_t led_cnt;
-    uint8_t res_cnt;
-    uint8_t is_dirty;
-    uint8_t zero_halves;
-    uint32_t dma_cbs;
-    uint32_t dat_cbs;
+    uint8_t led_cnt;                        // Counts through the leds starting from zero up to "leds"
+    uint8_t res_cnt;                        // Counts reset cycles when in reset state
+    uint8_t is_dirty;                       // Indicates to the call back that the led color values have been updated
+    uint8_t zero_halves;                    // Counts halves send during reset
+    uint32_t dma_cbs;                       // Just used for statistics
+    uint32_t dat_cbs;                       // Also used for statistics
 } ws2812_handleTypeDef;
 
 ws2812_resultTypeDef ws2812_init(ws2812_handleTypeDef *ws2812, TIM_HandleTypeDef *timer, uint32_t channel, uint16_t leds);
