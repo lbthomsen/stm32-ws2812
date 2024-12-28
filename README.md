@@ -2,6 +2,10 @@
 
 STM32 Library for WS2812 using DMA+PWM
 
+## Wiki Page
+
+The primary documentation is on our wiki here: https://stm32world.com/wiki/STM32_WS2812_(NeoPixel_RGB_LED)
+
 ## STM32CubeIDE Setup
 
 The folder containing the library source will need to be included in STM32CubeIDE under Includes 
