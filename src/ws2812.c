@@ -5,7 +5,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2022 - 2024 Lars Boegild Thomsen <lbthomsen@gmail.com>
+ * Copyright (c) 2022 - 2025 Lars Boegild Thomsen <lbthomsen@gmail.com>
  * All rights reserved
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -85,7 +85,7 @@ inline void ws2812_update_buffer(ws2812_handleTypeDef *ws2812, uint16_t *dma_buf
 
             // Copy values from the pre-filled color_value buffer
             memcpy(dma_buffer_pointer, color_value[led[c]], 16); // Lookup the actual buffer data
-            dma_buffer_pointer += 8; // next 8 bytes
+            dma_buffer_pointer += 8; // next 8 16 bit values
 
         }
 
