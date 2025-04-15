@@ -44,7 +44,7 @@ inline void ws2812_update_buffer(ws2812_handleTypeDef *ws2812, uint16_t *dma_buf
     // idle (just winging out zero buffers) or
     // we are transmitting data for the "current" led.
 
-	++ws2812->dma_cbs;
+    ++ws2812->dma_cbs;
 
     if (ws2812->led_state == LED_RES) { // Latch state - 10 or more full buffers of zeros
 
@@ -162,7 +162,7 @@ ws2812_resultTypeDef ws2812_init(ws2812_handleTypeDef *ws2812, TIM_HandleTypeDef
 
         // Start DMA to feed the PWM with values
         // At this point the buffer should be empty - all zeros
-        HAL_TIM_PWM_Start_DMA(timer, channel, (uint32_t*)ws2812->dma_buffer, BUFFER_SIZE * 2);
+        HAL_TIM_PWM_Start_DMA(timer, channel, (uint32_t*) ws2812->dma_buffer, BUFFER_SIZE * 2);
 
     } else {
         res = WS2812_Mem;
