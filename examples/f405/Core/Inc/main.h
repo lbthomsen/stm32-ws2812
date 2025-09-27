@@ -65,6 +65,9 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define LEDS 64
+//#define CUSTOM_HID_EPIN_SIZE 0x16U
+#define USBD_MAX_POWER                              0xFAU // request 500 mA
+#define USBD_CUSTOMHID_REPORT_BUFFER_EVENT_ENABLED  1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -105,6 +105,8 @@ extern USBD_CUSTOM_HID_ItfTypeDef USBD_CustomHID_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
 
+void CUSTOM_HID_OutEvent_FS_Handler(uint8_t *buffer);
+
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**

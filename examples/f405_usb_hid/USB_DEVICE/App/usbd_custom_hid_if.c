@@ -91,7 +91,23 @@
 __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END =
 {
   /* USER CODE BEGIN 0 */
-  0x00,
+
+        0x06, 0x00, 0xFF, // USAGE_PAGE (Vendor Defined Page 1)
+        0x09, 0x01,       // USAGE (Vendor Usage 1)
+        0xA1, 0x01,       // COLLECTION (Application)
+
+        // Input Report (Device to Host)
+        0x09, 0x02,       //   USAGE (Vendor Usage 2)
+        0x75, 0x08,       //   REPORT_SIZE (8)
+        0x95, 0x40,       //   REPORT_COUNT (64)
+        0x81, 0x02,       //   INPUT (Data,Var,Abs)
+
+        // Output Report (Host to Device)
+        0x09, 0x03,       //   USAGE (Vendor Usage 3)
+        0x75, 0x08,       //   REPORT_SIZE (8)
+        0x95, 0x40,       //   REPORT_COUNT (64)
+        0x91, 0x02,       //   OUTPUT (Data,Var,Abs)
+
   /* USER CODE END 0 */
   0xC0    /*     END_COLLECTION	             */
 };
@@ -179,13 +195,17 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
   UNUSED(event_idx);
   UNUSED(state);
 
+  uint8_t *buffer = (uint8_t*) ((uint32_t) event_idx);
+
+  CUSTOM_HID_OutEvent_FS_Handler(buffer);
+
   /* Start next USB packet transfer once data processing is completed */
-  if (USBD_CUSTOM_HID_ReceivePacket(&hUsbDeviceFS) != (uint8_t)USBD_OK)
-  {
-    return -1;
+  if (USBD_CUSTOM_HID_ReceivePacket(&hUsbDeviceFS) != (uint8_t) USBD_OK) {
+      return -1;
   }
 
   return (USBD_OK);
+
   /* USER CODE END 6 */
 }
 
@@ -205,6 +225,10 @@ static int8_t USBD_CUSTOM_HID_SendReport_FS(uint8_t *report, uint16_t len)
 /* USER CODE END 7 */
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
+
+__weak void CUSTOM_HID_OutEvent_FS_Handler(uint8_t *buffer) {
+    UNUSED(buffer);
+}
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 /**
