@@ -59,7 +59,7 @@ void ws2812_demos_tick(ws2812_handleTypeDef *ws2812) {
                 ++line_color;
             if (line_color >= sizeof(led_line_colors) / sizeof(led_line_colors[0]))
                 line_color = 0;
-            if (line_led >= LEDS)
+            if (line_led >= ws2812->leds)
                 line_led = 0;
 
             next_led = now + led_interval;
