@@ -126,7 +126,7 @@ void CUSTOM_HID_OutEvent_FS_Handler(uint8_t *buffer) {
         uint8_t g = buffer[4];
         uint8_t b = buffer[5];
 
-        //printf("Setting led %d to %d/%d/%d\n", led, r, g, b);
+        printf("Setting led %d to %d/%d/%d\n", led, r, g, b);
 
         setLedValues(&ws2812, led, r, g, b);
 
