@@ -42,8 +42,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim4;
-DMA_HandleTypeDef hdma_tim4_up;
+TIM_HandleTypeDef htim3;
+DMA_HandleTypeDef hdma_tim3_ch3;
 
 UART_HandleTypeDef huart1;
 
@@ -57,7 +57,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_TIM4_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -81,7 +81,7 @@ int _write(int fd, char *ptr, int len) {
 // Done sending first half of the DMA buffer - this can now safely be updated
 void HAL_TIM_PWM_PulseFinishedHalfCpltCallback(TIM_HandleTypeDef *htim) {
 
-    if (htim->Instance == TIM4) {
+    if (htim->Instance == TIM3) {
         ws2812_update_buffer(&ws2812, &ws2812.dma_buffer[0]);
     }
 
@@ -90,7 +90,7 @@ void HAL_TIM_PWM_PulseFinishedHalfCpltCallback(TIM_HandleTypeDef *htim) {
 // Done sending the second half of the DMA buffer - this can now be safely updated
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
 
-    if (htim->Instance == TIM4) {
+    if (htim->Instance == TIM3) {
         ws2812_update_buffer(&ws2812, &ws2812.dma_buffer[BUFFER_SIZE]);
     }
 
@@ -133,12 +133,12 @@ int main(void)
     MX_GPIO_Init();
     MX_DMA_Init();
     MX_USART1_UART_Init();
-    MX_TIM4_Init();
+    MX_TIM3_Init();
     /* USER CODE BEGIN 2 */
 
     printf("WS2812 Demo\n");
 
-    ws2812_init(&ws2812, &htim4, TIM_CHANNEL_4, 64);
+    ws2812_init(&ws2812, &htim3, TIM_CHANNEL_3, 64);
     zeroLedValues(&ws2812);
 
     ws2812_demos_set(&ws2812, 1);
@@ -222,46 +222,46 @@ void SystemClock_Config(void)
 }
 
 /**
- * @brief TIM4 Initialization Function
+ * @brief TIM3 Initialization Function
  * @param None
  * @retval None
  */
-static void MX_TIM4_Init(void)
+static void MX_TIM3_Init(void)
 {
 
-    /* USER CODE BEGIN TIM4_Init 0 */
+    /* USER CODE BEGIN TIM3_Init 0 */
 
-    /* USER CODE END TIM4_Init 0 */
+    /* USER CODE END TIM3_Init 0 */
 
     TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
     TIM_MasterConfigTypeDef sMasterConfig = { 0 };
     TIM_OC_InitTypeDef sConfigOC = { 0 };
 
-    /* USER CODE BEGIN TIM4_Init 1 */
+    /* USER CODE BEGIN TIM3_Init 1 */
 
-    /* USER CODE END TIM4_Init 1 */
-    htim4.Instance = TIM4;
-    htim4.Init.Prescaler = 0;
-    htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim4.Init.Period = LED_CNT;
-    htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+    /* USER CODE END TIM3_Init 1 */
+    htim3.Instance = TIM3;
+    htim3.Init.Prescaler = 0;
+    htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim3.Init.Period = LED_CNT;
+    htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
             {
         Error_Handler();
     }
     sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+    if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
             {
         Error_Handler();
     }
-    if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+    if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
             {
         Error_Handler();
     }
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
             {
         Error_Handler();
     }
@@ -269,14 +269,14 @@ static void MX_TIM4_Init(void)
     sConfigOC.Pulse = 0;
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
+    if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
             {
         Error_Handler();
     }
-    /* USER CODE BEGIN TIM4_Init 2 */
+    /* USER CODE BEGIN TIM3_Init 2 */
 
-    /* USER CODE END TIM4_Init 2 */
-    HAL_TIM_MspPostInit(&htim4);
+    /* USER CODE END TIM3_Init 2 */
+    HAL_TIM_MspPostInit(&htim3);
 
 }
 
@@ -323,9 +323,9 @@ static void MX_DMA_Init(void)
     __HAL_RCC_DMA1_CLK_ENABLE();
 
     /* DMA interrupt init */
-    /* DMA1_Stream6_IRQn interrupt configuration */
-    HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+    /* DMA1_Stream7_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Stream7_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream7_IRQn);
 
 }
 
@@ -344,8 +344,8 @@ static void MX_GPIO_Init(void)
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
-    __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
@@ -356,6 +356,30 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : PB15 */
+    GPIO_InitStruct.Pin = GPIO_PIN_15;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF9_TIM12;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : PB6 */
+    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : PB9 */
+    GPIO_InitStruct.Pin = GPIO_PIN_9;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* USER CODE BEGIN MX_GPIO_Init_2 */
 
