@@ -23,11 +23,11 @@
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-extern DMA_NodeTypeDef Node_GPDMA1_Channel5;
+extern DMA_NodeTypeDef Node_GPDMA1_Channel0;
 
-extern DMA_QListTypeDef List_GPDMA1_Channel5;
+extern DMA_QListTypeDef List_GPDMA1_Channel0;
 
-extern DMA_HandleTypeDef handle_GPDMA1_Channel5;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -90,18 +90,18 @@ void HAL_MspInit(void)
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 {
   DMA_NodeConfTypeDef NodeConfig;
-  if(htim_base->Instance==TIM5)
+  if(htim_base->Instance==TIM3)
   {
-    /* USER CODE BEGIN TIM5_MspInit 0 */
+    /* USER CODE BEGIN TIM3_MspInit 0 */
 
-    /* USER CODE END TIM5_MspInit 0 */
+    /* USER CODE END TIM3_MspInit 0 */
     /* Peripheral clock enable */
-    __HAL_RCC_TIM5_CLK_ENABLE();
+    __HAL_RCC_TIM3_CLK_ENABLE();
 
-    /* TIM5 DMA Init */
-    /* GPDMA1_REQUEST_TIM5_UP Init */
+    /* TIM3 DMA Init */
+    /* GPDMA1_REQUEST_TIM3_CH3 Init */
     NodeConfig.NodeType = DMA_GPDMA_LINEAR_NODE;
-    NodeConfig.Init.Request = GPDMA1_REQUEST_TIM5_UP;
+    NodeConfig.Init.Request = GPDMA1_REQUEST_TIM3_CH3;
     NodeConfig.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
     NodeConfig.Init.Direction = DMA_MEMORY_TO_PERIPH;
     NodeConfig.Init.SrcInc = DMA_SINC_INCREMENTED;
@@ -116,50 +116,47 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     NodeConfig.TriggerConfig.TriggerPolarity = DMA_TRIG_POLARITY_MASKED;
     NodeConfig.DataHandlingConfig.DataExchange = DMA_EXCHANGE_NONE;
     NodeConfig.DataHandlingConfig.DataAlignment = DMA_DATA_RIGHTALIGN_ZEROPADDED;
-    if (HAL_DMAEx_List_BuildNode(&NodeConfig, &Node_GPDMA1_Channel5) != HAL_OK)
+    if (HAL_DMAEx_List_BuildNode(&NodeConfig, &Node_GPDMA1_Channel0) != HAL_OK)
     {
       Error_Handler();
     }
 
-    if (HAL_DMAEx_List_InsertNode(&List_GPDMA1_Channel5, NULL, &Node_GPDMA1_Channel5) != HAL_OK)
+    if (HAL_DMAEx_List_InsertNode(&List_GPDMA1_Channel0, NULL, &Node_GPDMA1_Channel0) != HAL_OK)
     {
       Error_Handler();
     }
 
-    if (HAL_DMAEx_List_SetCircularMode(&List_GPDMA1_Channel5) != HAL_OK)
+    if (HAL_DMAEx_List_SetCircularMode(&List_GPDMA1_Channel0) != HAL_OK)
     {
       Error_Handler();
     }
 
-    handle_GPDMA1_Channel5.Instance = GPDMA1_Channel5;
-    handle_GPDMA1_Channel5.InitLinkedList.Priority = DMA_LOW_PRIORITY_LOW_WEIGHT;
-    handle_GPDMA1_Channel5.InitLinkedList.LinkStepMode = DMA_LSM_FULL_EXECUTION;
-    handle_GPDMA1_Channel5.InitLinkedList.LinkAllocatedPort = DMA_LINK_ALLOCATED_PORT0;
-    handle_GPDMA1_Channel5.InitLinkedList.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
-    handle_GPDMA1_Channel5.InitLinkedList.LinkedListMode = DMA_LINKEDLIST_CIRCULAR;
-    if (HAL_DMAEx_List_Init(&handle_GPDMA1_Channel5) != HAL_OK)
+    handle_GPDMA1_Channel0.Instance = GPDMA1_Channel0;
+    handle_GPDMA1_Channel0.InitLinkedList.Priority = DMA_LOW_PRIORITY_LOW_WEIGHT;
+    handle_GPDMA1_Channel0.InitLinkedList.LinkStepMode = DMA_LSM_FULL_EXECUTION;
+    handle_GPDMA1_Channel0.InitLinkedList.LinkAllocatedPort = DMA_LINK_ALLOCATED_PORT0;
+    handle_GPDMA1_Channel0.InitLinkedList.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
+    handle_GPDMA1_Channel0.InitLinkedList.LinkedListMode = DMA_LINKEDLIST_CIRCULAR;
+    if (HAL_DMAEx_List_Init(&handle_GPDMA1_Channel0) != HAL_OK)
     {
       Error_Handler();
     }
 
-    if (HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel5, &List_GPDMA1_Channel5) != HAL_OK)
+    if (HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel0, &List_GPDMA1_Channel0) != HAL_OK)
     {
       Error_Handler();
     }
 
-    __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_UPDATE], handle_GPDMA1_Channel5);
+    __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_CC3], handle_GPDMA1_Channel0);
 
-    if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA1_Channel5, DMA_CHANNEL_NPRIV) != HAL_OK)
+    if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA1_Channel0, DMA_CHANNEL_NPRIV) != HAL_OK)
     {
       Error_Handler();
     }
 
-    /* TIM5 interrupt Init */
-    HAL_NVIC_SetPriority(TIM5_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(TIM5_IRQn);
-    /* USER CODE BEGIN TIM5_MspInit 1 */
+    /* USER CODE BEGIN TIM3_MspInit 1 */
 
-    /* USER CODE END TIM5_MspInit 1 */
+    /* USER CODE END TIM3_MspInit 1 */
 
   }
 
@@ -168,26 +165,26 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(htim->Instance==TIM5)
+  if(htim->Instance==TIM3)
   {
-    /* USER CODE BEGIN TIM5_MspPostInit 0 */
+    /* USER CODE BEGIN TIM3_MspPostInit 0 */
 
-    /* USER CODE END TIM5_MspPostInit 0 */
+    /* USER CODE END TIM3_MspPostInit 0 */
 
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**TIM5 GPIO Configuration
-    PA2     ------> TIM5_CH3
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    /**TIM3 GPIO Configuration
+    PB0     ------> TIM3_CH3
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Pin = GPIO_PIN_0;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF2_TIM5;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* USER CODE BEGIN TIM5_MspPostInit 1 */
+    /* USER CODE BEGIN TIM3_MspPostInit 1 */
 
-    /* USER CODE END TIM5_MspPostInit 1 */
+    /* USER CODE END TIM3_MspPostInit 1 */
   }
 
 }
@@ -199,22 +196,19 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   */
 void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 {
-  if(htim_base->Instance==TIM5)
+  if(htim_base->Instance==TIM3)
   {
-    /* USER CODE BEGIN TIM5_MspDeInit 0 */
+    /* USER CODE BEGIN TIM3_MspDeInit 0 */
 
-    /* USER CODE END TIM5_MspDeInit 0 */
+    /* USER CODE END TIM3_MspDeInit 0 */
     /* Peripheral clock disable */
-    __HAL_RCC_TIM5_CLK_DISABLE();
+    __HAL_RCC_TIM3_CLK_DISABLE();
 
-    /* TIM5 DMA DeInit */
-    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_UPDATE]);
+    /* TIM3 DMA DeInit */
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC3]);
+    /* USER CODE BEGIN TIM3_MspDeInit 1 */
 
-    /* TIM5 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(TIM5_IRQn);
-    /* USER CODE BEGIN TIM5_MspDeInit 1 */
-
-    /* USER CODE END TIM5_MspDeInit 1 */
+    /* USER CODE END TIM3_MspDeInit 1 */
   }
 
 }
