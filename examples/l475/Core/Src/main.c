@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2025 Lars Boegild Thomsen <lbthomsen@gmail.com>
+ * Copyright (c) 2025 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -42,25 +42,22 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-
 TIM_HandleTypeDef htim3;
-DMA_NodeTypeDef Node_GPDMA1_Channel0;
-DMA_QListTypeDef List_GPDMA1_Channel0;
-DMA_HandleTypeDef handle_GPDMA1_Channel0;
+DMA_HandleTypeDef hdma_tim3_ch3;
 
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+uint32_t tim_cnt = 0;
 ws2812_handleTypeDef ws2812; // The WS2812 panel handler
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_GPDMA1_Init(void);
-static void MX_ICACHE_Init(void);
-static void MX_USART1_UART_Init(void);
+static void MX_DMA_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -99,6 +96,10 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
 
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    ++tim_cnt;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -130,10 +131,9 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
-    MX_GPDMA1_Init();
-    MX_ICACHE_Init();
-    MX_USART1_UART_Init();
+    MX_DMA_Init();
     MX_TIM3_Init();
+    MX_USART1_UART_Init();
     /* USER CODE BEGIN 2 */
 
     printf("WS2812 Demo\n");
@@ -147,7 +147,6 @@ int main(void)
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-
     uint32_t now = 0, next_blink = 500, next_tick = 1000, loop_count = 0;
 
     while (1) {
@@ -163,8 +162,8 @@ int main(void)
             next_blink = now + 500;
         }
 
-        if (now >= next_tick) { // Every 1000 ms
-            printf("Tick %lu (count = %lu dma = %lu dat = %lu)\n", now / 1000, loop_count, ws2812.dma_cbs, ws2812.dat_cbs);
+        if (now >= next_tick) {
+            printf("Tick %lu (count = %lu tim = %lu dma = %lu dat = %lu)\n", now / 1000, loop_count, tim_cnt, ws2812.dma_cbs, ws2812.dat_cbs);
             loop_count = 0;
             next_tick = now + 1000;
         }
@@ -188,9 +187,9 @@ void SystemClock_Config(void)
 
     /** Configure the main internal regulator output voltage
      */
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
-
-    while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {
+    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
+            {
+        Error_Handler();
     }
 
     /** Initializes the RCC Oscillators according to the specified parameters
@@ -199,15 +198,12 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLL1_SOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
     RCC_OscInitStruct.PLL.PLLM = 1;
-    RCC_OscInitStruct.PLL.PLLN = 31;
-    RCC_OscInitStruct.PLL.PLLP = 2;
-    RCC_OscInitStruct.PLL.PLLQ = 2;
-    RCC_OscInitStruct.PLL.PLLR = 2;
-    RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1_VCIRANGE_3;
-    RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1_VCORANGE_WIDE;
-    RCC_OscInitStruct.PLL.PLLFRACN = 2048;
+    RCC_OscInitStruct.PLL.PLLN = 10;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
+    RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+    RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
             {
         Error_Handler();
@@ -216,78 +212,16 @@ void SystemClock_Config(void)
     /** Initializes the CPU, AHB and APB buses clocks
      */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-            | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2
-            | RCC_CLOCKTYPE_PCLK3;
+            | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-    RCC_ClkInitStruct.APB3CLKDivider = RCC_HCLK_DIV1;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
             {
         Error_Handler();
     }
-
-    /** Configure the programming delay
-     */
-    __HAL_FLASH_SET_PROGRAM_DELAY(FLASH_PROGRAMMING_DELAY_2);
-}
-
-/**
- * @brief GPDMA1 Initialization Function
- * @param None
- * @retval None
- */
-static void MX_GPDMA1_Init(void)
-{
-
-    /* USER CODE BEGIN GPDMA1_Init 0 */
-
-    /* USER CODE END GPDMA1_Init 0 */
-
-    /* Peripheral clock enable */
-    __HAL_RCC_GPDMA1_CLK_ENABLE();
-
-    /* GPDMA1 interrupt Init */
-    HAL_NVIC_SetPriority(GPDMA1_Channel0_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(GPDMA1_Channel0_IRQn);
-
-    /* USER CODE BEGIN GPDMA1_Init 1 */
-
-    /* USER CODE END GPDMA1_Init 1 */
-    /* USER CODE BEGIN GPDMA1_Init 2 */
-
-    /* USER CODE END GPDMA1_Init 2 */
-
-}
-
-/**
- * @brief ICACHE Initialization Function
- * @param None
- * @retval None
- */
-static void MX_ICACHE_Init(void)
-{
-
-    /* USER CODE BEGIN ICACHE_Init 0 */
-
-    /* USER CODE END ICACHE_Init 0 */
-
-    /* USER CODE BEGIN ICACHE_Init 1 */
-
-    /* USER CODE END ICACHE_Init 1 */
-
-    /** Enable instruction cache (default 2-ways set associative cache)
-     */
-    if (HAL_ICACHE_Enable() != HAL_OK)
-            {
-        Error_Handler();
-    }
-    /* USER CODE BEGIN ICACHE_Init 2 */
-
-    /* USER CODE END ICACHE_Init 2 */
-
 }
 
 /**
@@ -310,9 +244,9 @@ static void MX_TIM3_Init(void)
 
     /* USER CODE END TIM3_Init 1 */
     htim3.Instance = TIM3;
-    htim3.Init.Prescaler = 2;
+    htim3.Init.Prescaler = 0;
     htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim3.Init.Period = 105;
+    htim3.Init.Period = LED_CNT;
     htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -328,7 +262,7 @@ static void MX_TIM3_Init(void)
             {
         Error_Handler();
     }
-    sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
     if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
             {
@@ -373,27 +307,30 @@ static void MX_USART1_UART_Init(void)
     huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     huart1.Init.OverSampling = UART_OVERSAMPLING_16;
     huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-    huart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
     huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
     if (HAL_UART_Init(&huart1) != HAL_OK)
-            {
-        Error_Handler();
-    }
-    if (HAL_UARTEx_SetTxFifoThreshold(&huart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-            {
-        Error_Handler();
-    }
-    if (HAL_UARTEx_SetRxFifoThreshold(&huart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-            {
-        Error_Handler();
-    }
-    if (HAL_UARTEx_DisableFifoMode(&huart1) != HAL_OK)
             {
         Error_Handler();
     }
     /* USER CODE BEGIN USART1_Init 2 */
 
     /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+ * Enable DMA controller clock
+ */
+static void MX_DMA_Init(void)
+{
+
+    /* DMA controller clock enable */
+    __HAL_RCC_DMA1_CLK_ENABLE();
+
+    /* DMA interrupt init */
+    /* DMA1_Channel2_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 
 }
 
@@ -416,11 +353,11 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
     /*Configure GPIO pin : LED_Pin */
     GPIO_InitStruct.Pin = LED_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);

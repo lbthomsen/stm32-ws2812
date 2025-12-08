@@ -162,7 +162,11 @@ ws2812_resultTypeDef ws2812_init(ws2812_handleTypeDef *ws2812, TIM_HandleTypeDef
 
         // Start DMA to feed the PWM with values
         // At this point the buffer should be empty - all zeros
+#ifdef STM32H562xx
+        HAL_TIM_PWM_Start_DMA(timer, channel, (uint32_t*) ws2812->dma_buffer, BUFFER_SIZE * 4); // I do NOT understand why 4 - but if 2 it won't work
+#else
         HAL_TIM_PWM_Start_DMA(timer, channel, (uint32_t*) ws2812->dma_buffer, BUFFER_SIZE * 2);
+#endif
 
     } else {
         res = WS2812_Mem;
