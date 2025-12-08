@@ -24,8 +24,8 @@
 #define BUFFER_SIZE 24
 
 // LED on/off counts.  PWM timer is running 125 counts.  LED_CNT need to be set to the total counts in the PWM.
-#define LED_OFF 1 * LED_CNT / 3 - 1  // A bit less than 1/3
-#define LED_ON 2 * LED_CNT / 3 + 2   // A bit more than 2/3
+#define LED_OFF 1 * LED_CNT / 3 - 2  // A bit less than 1/3
+#define LED_ON 2 * LED_CNT / 3 + 1   // A bit more than 2/3
 #define LED_RESET_CYCLES 10          // Full 24-bit cycles
 
 #define GL 0 // Green LED
