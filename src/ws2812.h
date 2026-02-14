@@ -52,7 +52,7 @@ typedef struct {
     uint16_t leds;                          // Number of LEDs on the string
     uint8_t *led;                           // Dynamically allocated array of LED RGB values
     ws2812_stateTypeDef led_state;          // LED Transfer state machine
-    uint16_t led_cnt;                        // Counts through the leds starting from zero up to "leds"
+    uint16_t led_cnt;                       // Counts through the leds starting from zero up to "leds"
     uint8_t res_cnt;                        // Counts reset cycles when in reset state
     uint8_t is_dirty;                       // Indicates to the call back that the led color values have been updated
     uint8_t zero_halves;                    // Counts halves send during reset
