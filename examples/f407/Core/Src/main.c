@@ -138,7 +138,7 @@ int main(void)
 
     printf("WS2812 Demo\n");
 
-    ws2812_init(&ws2812, &htim3, TIM_CHANNEL_3, 64);
+    ws2812_init(&ws2812, &htim3, TIM_CHANNEL_3, 128);
     zeroLedValues(&ws2812);
 
     ws2812_demos_set(&ws2812, 1);

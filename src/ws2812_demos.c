@@ -5,7 +5,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2024 Lars Boegild Thomsen <lbthomsen@gmail.com>.
+ * Copyright (c) 2024 - 2026 Lars Boegild Thomsen <lbthomsen@gmail.com>.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -55,7 +55,7 @@ void ws2812_demos_tick(ws2812_handleTypeDef *ws2812) {
             setLedValues(ws2812, line_led, led_line_colors[line_color][0], led_line_colors[line_color][1], led_line_colors[line_color][2]);
             ++line_led;
             ++line_count;
-            if (line_count % 64 == 0)
+            if (line_count % ws2812->leds == 0)
                 ++line_color;
             if (line_color >= sizeof(led_line_colors) / sizeof(led_line_colors[0]))
                 line_color = 0;
