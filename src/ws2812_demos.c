@@ -39,7 +39,7 @@ void ws2812_demos_set(ws2812_handleTypeDef *ws2812, uint8_t demo) {
 
 void ws2812_demos_tick(ws2812_handleTypeDef *ws2812) {
 
-    static const uint32_t led_interval = 10;
+    static const uint32_t led_interval = 1;
 
     static uint16_t line_led = 0;
     static uint32_t line_count = 0;
@@ -51,7 +51,6 @@ void ws2812_demos_tick(ws2812_handleTypeDef *ws2812) {
     switch (active_demo) {
     case WS2812_DEMO_LINE:
         if (now >= next_led) {
-            //zeroLedValues(ws2812);
             setLedValues(ws2812, line_led, led_line_colors[line_color][0], led_line_colors[line_color][1], led_line_colors[line_color][2]);
             ++line_led;
             ++line_count;
